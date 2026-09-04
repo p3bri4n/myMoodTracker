@@ -1,0 +1,21 @@
+<li class="card task-row task-{{ entry.status }}" id="task-{{ entry.id }}">
+  <span class="task-label">{{ entry.label }}</span>
+  <span class="task-assignee">
+    {% if entry.assigned_to is none %}{{ t('tasks.both') }}
+    {% else %}{{ users_by_id[entry.assigned_to].name }}
+    {% endif %}
+  </span>
+  <form class="task-status-form"
+        hx-patch="/tasks/{{ entry.id }}"
+        hx-target="#task-{{ entry.id }}"
+        hx-swap="outerHTML">
+    <input type="hidden" name="assigned_to" value="{{ entry.assigned_to if entry.assigned_to is not none else '' }}">
+    {% if entry.status == 'todo' %}
+    <input type="hidden" name="status" value="done">
+    <button type="submit">{{ t('tasks.status_todo') }} → {{ t('tasks.status_done') }}</button>
+    {% else %}
+    <input type="hidden" name="status" value="todo">
+    <button type="submit">{{ t('tasks.status_done') }} → {{ t('tasks.status_todo') }}</button>
+    {% endif %}
+  </form>
+</li>

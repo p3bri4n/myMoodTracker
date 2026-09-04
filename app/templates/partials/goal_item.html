@@ -1,0 +1,20 @@
+{% set table = 'daily_goals' %}
+{% set row = entry %}
+<li class="card goal-item {{ 'goal-done' if entry.done else '' }}">
+  {% if entry.user_id == user.id %}
+  <label>
+    <input type="checkbox" {% if entry.done %}checked{% endif %}
+      hx-patch="/goals/{{ entry.id }}"
+      hx-vals='{"done": "{{ 'false' if entry.done else 'true' }}"}'
+      hx-target="closest li"
+      hx-swap="outerHTML">
+    <span class="goal-label">{{ entry.label }}</span>
+  </label>
+  {% include "partials/visibility_badge.html" %}
+  {% else %}
+  <label class="goal-readonly">
+    <input type="checkbox" disabled {% if entry.done %}checked{% endif %}>
+    <span class="goal-label">{{ entry.label }}</span>
+  </label>
+  {% endif %}
+</li>

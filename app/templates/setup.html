@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}{{ t('setup.title') }} — myMoodTracker{% endblock %}
+{% block content %}
+<div class="auth-card">
+  <h1>{{ t('setup.title') }}</h1>
+  <form method="post" action="/setup">
+    <fieldset>
+      <legend>{{ t('setup.profile1') }}</legend>
+      <label for="name1">{{ t('setup.name') }}</label>
+      <input type="text" id="name1" name="name1" required>
+      <label for="color1">{{ t('setup.color') }}</label>
+      <input type="color" id="color1" name="color1" value="#4a90d9" required>
+      <label for="password1">{{ t('setup.password') }}</label>
+      <input type="password" id="password1" name="password1" required autocomplete="new-password">
+    </fieldset>
+    <fieldset>
+      <legend>{{ t('setup.profile2') }}</legend>
+      <label for="name2">{{ t('setup.name') }}</label>
+      <input type="text" id="name2" name="name2" required>
+      <label for="color2">{{ t('setup.color') }}</label>
+      <input type="color" id="color2" name="color2" value="#d97a4a" required>
+      <label for="password2">{{ t('setup.password') }}</label>
+      <input type="password" id="password2" name="password2" required autocomplete="new-password">
+    </fieldset>
+    <button type="submit">{{ t('setup.submit') }}</button>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,14 @@
+{% if row.user_id == user.id %}
+<button type="button"
+  id="visibility-{{ table }}-{{ row.id }}"
+  class="visibility-toggle visibility-{{ row.visibility }}"
+  hx-patch="/{{ table }}/{{ row.id }}/visibility"
+  hx-target="#visibility-{{ table }}-{{ row.id }}"
+  hx-swap="outerHTML">
+  {% if row.visibility == 'public' %}🌐 {{ t('visibility.public') }}{% else %}🔒 {{ t('visibility.private') }}{% endif %}
+</button>
+{% else %}
+<span class="visibility-badge visibility-{{ row.visibility }}">
+  {% if row.visibility == 'public' %}🌐 {{ t('visibility.public') }}{% else %}🔒 {{ t('visibility.private') }}{% endif %}
+</span>
+{% endif %}

@@ -1,0 +1,16 @@
+{% set selected_ids = (entry_needs | map(attribute='id') | list) if entry_needs is defined else [] %}
+<fieldset class="needs-select">
+  <legend>{{ t('needs.title') }}</legend>
+  {% for category, category_needs in needs_grouped.items() %}
+  <div class="needs-category">
+    <p class="needs-category-label">{{ t('needs.category_' + category|lower|replace('-', '_')) }}</p>
+    {% for need in category_needs %}
+    <label class="need-option">
+      <input type="checkbox" name="needs" value="{{ need.id }}"
+        {% if need.id in selected_ids %}checked{% endif %}>
+      {{ t('needs.' + need.name) }}
+    </label>
+    {% endfor %}
+  </div>
+  {% endfor %}
+</fieldset>

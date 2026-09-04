@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  @page { size: A4 landscape; margin: 1.5cm; }
+  body { font-family: sans-serif; font-size: 9pt; color: #222; }
+  h1 { font-size: 14pt; margin-bottom: 0.2cm; }
+  p.period { color: #555; margin-top: 0; margin-bottom: 0.8cm; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { border: 1px solid #ccc; padding: 4px 6px; text-align: left; vertical-align: top; }
+  th { background: #eee; }
+</style>
+</head>
+<body>
+  <h1>{{ t('export.title') }}</h1>
+  <p class="period">{{ date_from }} — {{ date_to }}</p>
+  <table>
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>{{ t('events.trigger') }}</th>
+        <th>{{ t('events.aggravating_factors') }}</th>
+        <th>{{ t('events.first_signs') }}</th>
+        <th>{{ t('events.emotion') }}</th>
+        <th>{{ t('events.intensity') }}</th>
+        <th>{{ t('events.thoughts') }}</th>
+        <th>{{ t('events.physiological_reactions') }}</th>
+        <th>{{ t('events.behavior') }}</th>
+        <th>{{ t('events.consequences') }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for e in events %}
+      <tr>
+        <td>{{ e.date }}{% if e.time %} {{ e.time }}{% endif %}</td>
+        <td>{{ e.trigger or '' }}</td>
+        <td>{{ e.aggravating_factors or '' }}</td>
+        <td>{{ e.first_signs or '' }}</td>
+        <td>{{ e.emotion or '' }}</td>
+        <td>{{ e.intensity if e.intensity is not none else '' }}</td>
+        <td>{{ e.thoughts or '' }}</td>
+        <td>{{ e.physiological_reactions or '' }}</td>
+        <td>{{ e.behavior or '' }}</td>
+        <td>{{ e.consequences or '' }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</body>
+</html>

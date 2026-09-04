@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block title %}{{ t('dashboard.title') }} — myMoodTracker{% endblock %}
+{% block content %}
+<h1>{{ t('dashboard.title') }}</h1>
+
+<section class="dashboard-section">
+  {% include "partials/mood_card.html" %}
+</section>
+
+<section class="dashboard-section">
+  <h2>{{ t('dreams.title') }}</h2>
+  <form class="card" hx-post="/dreams" hx-target="#dreams-list" hx-swap="beforeend">
+    <textarea name="content" placeholder="{{ t('dreams.content_placeholder') }}" required></textarea>
+    <select name="tag">
+      <option value="">{{ t('common.optional') }}</option>
+      <option value="pleasant">{{ t('dreams.tag_pleasant') }}</option>
+      <option value="neutral">{{ t('dreams.tag_neutral') }}</option>
+      <option value="nightmare">{{ t('dreams.tag_nightmare') }}</option>
+    </select>
+    <fieldset class="visibility-choice">
+      <label><input type="radio" name="visibility" value="private" checked> 🔒 {{ t('visibility.private') }}</label>
+      <label><input type="radio" name="visibility" value="public"> 🌐 {{ t('visibility.public') }}</label>
+    </fieldset>
+    <button type="submit">{{ t('dreams.save') }}</button>
+  </form>
+  <ul id="dreams-list" class="entry-list">
+    {% for entry in dreams %}{% include "partials/dream_card.html" %}{% endfor %}
+  </ul>
+</section>
+
+<section class="dashboard-section">
+  <h2>{{ t('goals.title') }} ({{ goals_progress[0] }}/{{ goals_progress[1] }})</h2>
+  <form class="card" hx-post="/goals" hx-target="#goals-list" hx-swap="beforeend">
+    <input type="text" name="label" placeholder="{{ t('goals.add_placeholder') }}" required>
+    <fieldset class="visibility-choice">
+      <label><input type="radio" name="visibility" value="private" checked> 🔒 {{ t('visibility.private') }}</label>
+      <label><input type="radio" name="visibility" value="public"> 🌐 {{ t('visibility.public') }}</label>
+    </fieldset>
+    <button type="submit">{{ t('goals.add') }}</button>
+  </form>
+  <ul id="goals-list" class="entry-list">
+    {% for entry in goals %}{% include "partials/goal_item.html" %}{% endfor %}
+  </ul>
+</section>
+
+<section class="dashboard-section">
+  <h2>{{ t('events.title') }}</h2>
+
+  <details class="card">
+    <summary>{{ t('events.add_positive') }}</summary>
+    <form hx-post="/events" hx-target="#events-list" hx-swap="afterbegin">
+      <input type="hidden" name="type" value="positive">
+      <input type="text" name="description" placeholder="{{ t('events.description_placeholder') }}" required>
+      <label>{{ t('events.time') }} <input type="time" name="time"></label>
+      {% include "partials/needs_select.html" %}
+      <fieldset class="visibility-choice">
+        <label><input type="radio" name="visibility" value="private" checked> 🔒 {{ t('visibility.private') }}</label>
+        <label><input type="radio" name="visibility" value="public"> 🌐 {{ t('visibility.public') }}</label>
+      </fieldset>
+      <button type="submit">{{ t('common.submit') }}</button>
+    </form>
+  </details>
+
+  <details class="card">
+    <summary>{{ t('events.add_negative') }}</summary>
+    <form hx-post="/events" hx-target="#events-list" hx-swap="afterbegin">
+      <input type="hidden" name="type" value="negative">
+      <label>{{ t('events.time') }} <input type="time" name="time"></label>
+      <label>{{ t('events.trigger') }}</label>
+      <textarea name="trigger" required></textarea>
+      <label>{{ t('events.aggravating_factors') }} ({{ t('common.optional') }})</label>
+      <textarea name="aggravating_factors"></textarea>
+      <label>{{ t('events.first_signs') }} ({{ t('common.optional') }})</label>
+      <textarea name="first_signs"></textarea>
+      <label>{{ t('events.emotion') }}</label>
+      <input type="text" name="emotion" required>
+      <label>{{ t('events.intensity') }} <output for="negative_intensity">5</output></label>
+      <input type="range" id="negative_intensity" name="intensity" min="0" max="10" value="5"
+        oninput="this.previousElementSibling.value = this.value">
+      <label>{{ t('events.thoughts') }} ({{ t('common.optional') }})</label>
+      <textarea name="thoughts"></textarea>
+      <label>{{ t('events.physiological_reactions') }} ({{ t('common.optional') }})</label>
+      <textarea name="physiological_reactions"></textarea>
+      <label>{{ t('events.behavior') }} ({{ t('common.optional') }})</label>
+      <textarea name="behavior"></textarea>
+      <label>{{ t('events.consequences') }} ({{ t('common.optional') }})</label>
+      <textarea name="consequences"></textarea>
+      {% include "partials/needs_select.html" %}
+      <fieldset class="visibility-choice">
+        <label><input type="radio" name="visibility" value="private" checked> 🔒 {{ t('visibility.private') }}</label>
+        <label><input type="radio" name="visibility" value="public"> 🌐 {{ t('visibility.public') }}</label>
+      </fieldset>
+      <button type="submit">{{ t('common.submit') }}</button>
+    </form>
+  </details>
+
+  {% include "partials/event_list.html" %}
+</section>
+{% endblock %}

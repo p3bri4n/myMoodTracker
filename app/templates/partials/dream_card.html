@@ -1,0 +1,7 @@
+{% set table = 'dreams' %}
+{% set row = entry %}
+<li class="card dream-card">
+  <p>{{ entry.content }}</p>
+  {% if entry.tag %}<span class="dream-tag dream-tag-{{ entry.tag }}">{{ t('dreams.tag_' + entry.tag) }}</span>{% endif %}
+  {% include "partials/visibility_badge.html" %}
+</li>

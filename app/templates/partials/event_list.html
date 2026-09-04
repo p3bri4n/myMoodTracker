@@ -1,0 +1,7 @@
+<ul id="events-list" class="entry-list">
+  {% for item in entries %}
+    {% with entry = item.entry, entry_needs = item.entry_needs %}
+      {% include "partials/event_row.html" %}
+    {% endwith %}
+  {% endfor %}
+</ul>

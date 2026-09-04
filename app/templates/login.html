@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}{{ t('login.title') }} — myMoodTracker{% endblock %}
+{% block content %}
+<div class="auth-card">
+  <h1>{{ t('login.title') }}</h1>
+  {% if error %}<p class="form-error">{{ t(error) }}</p>{% endif %}
+  <form method="post" action="/login">
+    <fieldset>
+      <legend>{{ t('login.select_profile') }}</legend>
+      {% for u in users %}
+      <label class="profile-option">
+        <input type="radio" name="user_id" value="{{ u.id }}" required>
+        <span class="profile-dot" style="background-color: {{ u.color }}"></span>
+        {{ u.name }}
+      </label>
+      {% endfor %}
+    </fieldset>
+    <label for="password">{{ t('login.password') }}</label>
+    <input type="password" id="password" name="password" required autocomplete="current-password">
+    <button type="submit">{{ t('login.submit') }}</button>
+  </form>
+</div>
+{% endblock %}
