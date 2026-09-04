@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}{{ t('tasks.title') }} — myMoodTracker{% endblock %}
+{% block content %}
+<h1>{{ t('tasks.title') }}</h1>
+
+<form class="card" hx-post="/tasks" hx-target="#tasks-list" hx-swap="beforeend">
+  <input type="text" name="label" placeholder="{{ t('tasks.add_placeholder') }}" required>
+  <select name="assigned_to">
+    <option value="">{{ t('tasks.both') }}</option>
+    {% for u in users %}
+    <option value="{{ u.id }}">{{ u.name }}</option>
+    {% endfor %}
+  </select>
+  <button type="submit">{{ t('tasks.add') }}</button>
+</form>
+
+{% include "partials/task_list.html" %}
+{% endblock %}

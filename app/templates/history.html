@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}{{ t('history.title') }} — myMoodTracker{% endblock %}
+{% block content %}
+<h1>{{ t('history.title') }}</h1>
+
+<form method="get" action="/history" class="card">
+  <label for="history-date">{{ t('history.date_label') }}</label>
+  <input type="date" id="history-date" name="date" value="{{ selected_date }}">
+  <button type="submit">{{ t('common.submit') }}</button>
+</form>
+
+<a href="/export/pdf?date_from={{ selected_date }}&date_to={{ selected_date }}" class="export-link">{{ t('export.title') }}</a>
+
+<section class="dashboard-section">
+  <h2>{{ t('mood.title') }}</h2>
+  {% if mood_entries %}
+  <ul class="entry-list">
+    {% for entry in mood_entries %}
+    <li class="card mood-summary">
+      <p>{{ t('mood.physical_fatigue') }}: {{ entry.physical_fatigue }} — {{ t('mood.mental_fatigue') }}: {{ entry.mental_fatigue }} — {{ t('mood.mood') }}: {{ entry.mood }}</p>
+      <p>{{ t('mood.social_need') }}: {{ entry.social_need }} — {{ t('mood.stress') }}: {{ entry.stress }} — {{ t('mood.sleep_quality') }}: {{ entry.sleep_quality }}</p>
+      {% if entry.note %}<p class="mood-note">{{ entry.note }}</p>{% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}<p>{{ t('history.no_data') }}</p>{% endif %}
+</section>
+
+<section class="dashboard-section">
+  <h2>{{ t('dreams.title') }}</h2>
+  {% if dreams %}
+  <ul class="entry-list">
+    {% for entry in dreams %}
+    <li class="card dream-card">
+      <p>{{ entry.content }}</p>
+      {% if entry.tag %}<span class="dream-tag dream-tag-{{ entry.tag }}">{{ t('dreams.tag_' + entry.tag) }}</span>{% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}<p>{{ t('history.no_data') }}</p>{% endif %}
+</section>
+
+<section class="dashboard-section">
+  <h2>{{ t('goals.title') }}</h2>
+  {% if goals %}
+  <ul class="entry-list">
+    {% for entry in goals %}
+    <li class="card goal-item {{ 'goal-done' if entry.done else '' }}">{{ entry.label }}</li>
+    {% endfor %}
+  </ul>
+  {% else %}<p>{{ t('history.no_data') }}</p>{% endif %}
+</section>
+
+<section class="dashboard-section">
+  <h2>{{ t('events.title') }}</h2>
+  {% if events %}
+  <ul class="entry-list">
+    {% for item in events %}
+      {% with entry = item.entry, entry_needs = item.entry_needs %}
+        {% include "partials/event_row.html" %}
+      {% endwith %}
+    {% endfor %}
+  </ul>
+  {% else %}<p>{{ t('history.no_data') }}</p>{% endif %}
+</section>
+{% endblock %}

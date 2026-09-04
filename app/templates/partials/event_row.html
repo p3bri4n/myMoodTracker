@@ -1,0 +1,30 @@
+{% set table = 'events' %}
+{% set row = entry %}
+<li class="card event-row event-row-{{ entry.type }}">
+  <div class="event-row-header">
+    <span class="event-type-icon">{% if entry.type == 'positive' %}➕{% else %}➖{% endif %}</span>
+    {% if entry.time %}<span class="event-time">{{ entry.time }}</span>{% endif %}
+    {% include "partials/visibility_badge.html" %}
+  </div>
+
+  {% if entry.description %}<p class="event-description">{{ entry.description }}</p>{% endif %}
+
+  {% if entry.type == 'negative' %}
+  <dl class="event-grid">
+    <dt>{{ t('events.trigger') }}</dt><dd>{{ entry.trigger }}</dd>
+    {% if entry.aggravating_factors %}<dt>{{ t('events.aggravating_factors') }}</dt><dd>{{ entry.aggravating_factors }}</dd>{% endif %}
+    {% if entry.first_signs %}<dt>{{ t('events.first_signs') }}</dt><dd>{{ entry.first_signs }}</dd>{% endif %}
+    <dt>{{ t('events.emotion') }}</dt><dd>{{ entry.emotion }} ({{ entry.intensity }}/10)</dd>
+    {% if entry.thoughts %}<dt>{{ t('events.thoughts') }}</dt><dd>{{ entry.thoughts }}</dd>{% endif %}
+    {% if entry.physiological_reactions %}<dt>{{ t('events.physiological_reactions') }}</dt><dd>{{ entry.physiological_reactions }}</dd>{% endif %}
+    {% if entry.behavior %}<dt>{{ t('events.behavior') }}</dt><dd>{{ entry.behavior }}</dd>{% endif %}
+    {% if entry.consequences %}<dt>{{ t('events.consequences') }}</dt><dd>{{ entry.consequences }}</dd>{% endif %}
+  </dl>
+  {% endif %}
+
+  {% if entry_needs %}
+  <ul class="entry-needs">
+    {% for need in entry_needs %}<li>{{ t('needs.' + need.name) }}</li>{% endfor %}
+  </ul>
+  {% endif %}
+</li>
