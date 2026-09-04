@@ -1,4 +1,10 @@
-"""Humeur du jour : une entrée par utilisateur et par jour (upsert)."""
+"""Humeur du jour : une entrée par utilisateur et par jour (upsert).
+
+Chaque indicateur est saisi via un sélecteur à 5 visages (😢🙁😐🙂😄) plutôt
+qu'un slider numérique : 1 = ressenti très négatif sur cet axe, 5 = très positif,
+de façon uniforme pour les 6 indicateurs (y compris fatigue/stress, où 5 signifie
+donc "peu de fatigue/stress ressenti").
+"""
 
 from __future__ import annotations
 
@@ -17,15 +23,14 @@ router = APIRouter()
 @router.post("/mood")
 def upsert_mood(
     request: Request,
-    physical_fatigue: int = Form(..., ge=1, le=10),
-    mental_fatigue: int = Form(..., ge=1, le=10),
-    mood: int = Form(..., ge=1, le=10),
-    social_need: int = Form(..., ge=1, le=10),
-    stress: int = Form(..., ge=1, le=10),
-    sleep_quality: int = Form(..., ge=1, le=10),
+    physical_fatigue: int = Form(..., ge=1, le=5),
+    mental_fatigue: int = Form(..., ge=1, le=5),
+    mood: int = Form(..., ge=1, le=5),
+    social_need: int = Form(..., ge=1, le=5),
+    stress: int = Form(..., ge=1, le=5),
+    sleep_quality: int = Form(..., ge=1, le=5),
     note: str | None = Form(None),
     visibility: Literal["private", "public"] = Form("private"),
-    needs: list[int] = Form([]),
     user: db.User = Depends(auth.get_current_user),
     conn: sqlite3.Connection = Depends(db.get_db),
 ):
@@ -44,15 +49,4 @@ def upsert_mood(
         note,
         visibility,
     )
-    db.replace_needs(conn, "mood", entry["id"], needs)
-    entry_needs = db.get_needs_for_entry(conn, "mood", entry["id"])
-    return render(
-        request,
-        "partials/mood_card.html",
-        {
-            "entry": entry,
-            "entry_needs": entry_needs,
-            "needs_grouped": db.get_needs_grouped(conn),
-        },
-        user=user,
-    )
+    return render(request, "partials/mood_card.html", {"entry": entry}, user=user)

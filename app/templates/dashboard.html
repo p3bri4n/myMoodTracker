@@ -3,12 +3,13 @@
 {% block content %}
 <h1>{{ t('dashboard.title') }}</h1>
 
-<section class="dashboard-section">
+<details class="dashboard-section" name="dashboard-accordion" open>
+  <summary class="section-summary">{{ t('mood.title') }}</summary>
   {% include "partials/mood_card.html" %}
-</section>
+</details>
 
-<section class="dashboard-section">
-  <h2>{{ t('dreams.title') }}</h2>
+<details class="dashboard-section" name="dashboard-accordion">
+  <summary class="section-summary">{{ t('dreams.title') }}</summary>
   <form class="card" hx-post="/dreams" hx-target="#dreams-list" hx-swap="beforeend">
     <textarea name="content" placeholder="{{ t('dreams.content_placeholder') }}" required></textarea>
     <select name="tag">
@@ -26,10 +27,10 @@
   <ul id="dreams-list" class="entry-list">
     {% for entry in dreams %}{% include "partials/dream_card.html" %}{% endfor %}
   </ul>
-</section>
+</details>
 
-<section class="dashboard-section">
-  <h2>{{ t('goals.title') }} ({{ goals_progress[0] }}/{{ goals_progress[1] }})</h2>
+<details class="dashboard-section" name="dashboard-accordion">
+  <summary class="section-summary">{{ t('goals.title') }} ({{ goals_progress[0] }}/{{ goals_progress[1] }})</summary>
   <form class="card" hx-post="/goals" hx-target="#goals-list" hx-swap="beforeend">
     <input type="text" name="label" placeholder="{{ t('goals.add_placeholder') }}" required>
     <fieldset class="visibility-choice">
@@ -41,18 +42,27 @@
   <ul id="goals-list" class="entry-list">
     {% for entry in goals %}{% include "partials/goal_item.html" %}{% endfor %}
   </ul>
-</section>
+</details>
 
-<section class="dashboard-section">
-  <h2>{{ t('events.title') }}</h2>
+<details class="dashboard-section" name="dashboard-accordion">
+  <summary class="section-summary">{{ t('events.title') }}</summary>
 
-  <details class="card">
+  <details class="card" name="event-form-accordion">
     <summary>{{ t('events.add_positive') }}</summary>
     <form hx-post="/events" hx-target="#events-list" hx-swap="afterbegin">
       <input type="hidden" name="type" value="positive">
       <input type="text" name="description" placeholder="{{ t('events.description_placeholder') }}" required>
       <label>{{ t('events.time') }} <input type="time" name="time"></label>
+      {% set form_id = 'positive' %}
+      {% include "partials/emotion_picker.html" %}
       {% include "partials/needs_select.html" %}
+      <label for="caused_by_positive">{{ t('events.caused_by') }} ({{ t('common.optional') }})</label>
+      <select name="caused_by_event_id" id="caused_by_positive">
+        <option value="">—</option>
+        {% for ev in recent_events %}
+        <option value="{{ ev.id }}">{{ ev.date }} — {{ (ev.description or ev.trigger or '')[:60] }}</option>
+        {% endfor %}
+      </select>
       <fieldset class="visibility-choice">
         <label><input type="radio" name="visibility" value="private" checked> 🔒 {{ t('visibility.private') }}</label>
         <label><input type="radio" name="visibility" value="public"> 🌐 {{ t('visibility.public') }}</label>
@@ -61,7 +71,7 @@
     </form>
   </details>
 
-  <details class="card">
+  <details class="card" name="event-form-accordion">
     <summary>{{ t('events.add_negative') }}</summary>
     <form hx-post="/events" hx-target="#events-list" hx-swap="afterbegin">
       <input type="hidden" name="type" value="negative">
@@ -72,8 +82,8 @@
       <textarea name="aggravating_factors"></textarea>
       <label>{{ t('events.first_signs') }} ({{ t('common.optional') }})</label>
       <textarea name="first_signs"></textarea>
-      <label>{{ t('events.emotion') }}</label>
-      <input type="text" name="emotion" required>
+      {% set form_id = 'negative' %}
+      {% include "partials/emotion_picker.html" %}
       <label>{{ t('events.intensity') }} <output for="negative_intensity">5</output></label>
       <input type="range" id="negative_intensity" name="intensity" min="0" max="10" value="5"
         oninput="this.previousElementSibling.value = this.value">
@@ -86,6 +96,13 @@
       <label>{{ t('events.consequences') }} ({{ t('common.optional') }})</label>
       <textarea name="consequences"></textarea>
       {% include "partials/needs_select.html" %}
+      <label for="caused_by_negative">{{ t('events.caused_by') }} ({{ t('common.optional') }})</label>
+      <select name="caused_by_event_id" id="caused_by_negative">
+        <option value="">—</option>
+        {% for ev in recent_events %}
+        <option value="{{ ev.id }}">{{ ev.date }} — {{ (ev.description or ev.trigger or '')[:60] }}</option>
+        {% endfor %}
+      </select>
       <fieldset class="visibility-choice">
         <label><input type="radio" name="visibility" value="private" checked> 🔒 {{ t('visibility.private') }}</label>
         <label><input type="radio" name="visibility" value="public"> 🌐 {{ t('visibility.public') }}</label>
@@ -95,5 +112,5 @@
   </details>
 
   {% include "partials/event_list.html" %}
-</section>
+</details>
 {% endblock %}

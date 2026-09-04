@@ -1,46 +1,14 @@
+{% from "partials/face_picker.html" import face_picker with context %}
 <form id="mood-card" class="card mood-card" hx-post="/mood" hx-target="#mood-card" hx-swap="outerHTML">
-  <h2>{{ t('mood.title') }}</h2>
-
-  <label for="physical_fatigue">{{ t('mood.physical_fatigue') }}
-    <output for="physical_fatigue">{{ entry.physical_fatigue if entry else 5 }}</output></label>
-  <input type="range" id="physical_fatigue" name="physical_fatigue" min="1" max="10"
-    value="{{ entry.physical_fatigue if entry else 5 }}"
-    oninput="this.previousElementSibling.value = this.value">
-
-  <label for="mental_fatigue">{{ t('mood.mental_fatigue') }}
-    <output for="mental_fatigue">{{ entry.mental_fatigue if entry else 5 }}</output></label>
-  <input type="range" id="mental_fatigue" name="mental_fatigue" min="1" max="10"
-    value="{{ entry.mental_fatigue if entry else 5 }}"
-    oninput="this.previousElementSibling.value = this.value">
-
-  <label for="mood">{{ t('mood.mood') }}
-    <output for="mood">{{ entry.mood if entry else 5 }}</output></label>
-  <input type="range" id="mood" name="mood" min="1" max="10"
-    value="{{ entry.mood if entry else 5 }}"
-    oninput="this.previousElementSibling.value = this.value">
-
-  <label for="social_need">{{ t('mood.social_need') }}
-    <output for="social_need">{{ entry.social_need if entry else 5 }}</output></label>
-  <input type="range" id="social_need" name="social_need" min="1" max="10"
-    value="{{ entry.social_need if entry else 5 }}"
-    oninput="this.previousElementSibling.value = this.value">
-
-  <label for="stress">{{ t('mood.stress') }}
-    <output for="stress">{{ entry.stress if entry else 5 }}</output></label>
-  <input type="range" id="stress" name="stress" min="1" max="10"
-    value="{{ entry.stress if entry else 5 }}"
-    oninput="this.previousElementSibling.value = this.value">
-
-  <label for="sleep_quality">{{ t('mood.sleep_quality') }}
-    <output for="sleep_quality">{{ entry.sleep_quality if entry else 5 }}</output></label>
-  <input type="range" id="sleep_quality" name="sleep_quality" min="1" max="10"
-    value="{{ entry.sleep_quality if entry else 5 }}"
-    oninput="this.previousElementSibling.value = this.value">
+  {{ face_picker('physical_fatigue', t('mood.physical_fatigue'), entry.physical_fatigue if entry else 3) }}
+  {{ face_picker('mental_fatigue', t('mood.mental_fatigue'), entry.mental_fatigue if entry else 3) }}
+  {{ face_picker('mood', t('mood.mood'), entry.mood if entry else 3) }}
+  {{ face_picker('social_need', t('mood.social_need'), entry.social_need if entry else 3) }}
+  {{ face_picker('stress', t('mood.stress'), entry.stress if entry else 3) }}
+  {{ face_picker('sleep_quality', t('mood.sleep_quality'), entry.sleep_quality if entry else 3) }}
 
   <label for="mood-note">{{ t('mood.note') }}</label>
   <textarea id="mood-note" name="note" placeholder="{{ t('mood.note_placeholder') }}">{{ entry.note if entry else '' }}</textarea>
-
-  {% include "partials/needs_select.html" %}
 
   <fieldset class="visibility-choice">
     <label><input type="radio" name="visibility" value="private" {% if not entry or entry.visibility == 'private' %}checked{% endif %}> 🔒 {{ t('visibility.private') }}</label>

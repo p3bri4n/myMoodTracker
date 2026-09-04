@@ -1,6 +1,6 @@
 {% set selected_ids = (entry_needs | map(attribute='id') | list) if entry_needs is defined else [] %}
-<fieldset class="needs-select">
-  <legend>{{ t('needs.title') }}</legend>
+<details class="needs-select">
+  <summary>{{ t('needs.title') }}{% if selected_ids %} ({{ selected_ids|length }}){% endif %}</summary>
   {% for category, category_needs in needs_grouped.items() %}
   <div class="needs-category">
     <p class="needs-category-label">{{ t('needs.category_' + category|lower|replace('-', '_')) }}</p>
@@ -13,4 +13,4 @@
     {% endfor %}
   </div>
   {% endfor %}
-</fieldset>
+</details>

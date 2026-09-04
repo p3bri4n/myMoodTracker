@@ -1,0 +1,8 @@
+<div class="emotion-tiles">
+  {% for core in cores %}
+  <button type="button" class="emotion-tile emotion-tile-core emotion-core-{{ core|lower }}"
+    hx-get="/emotions?core={{ core|urlencode }}&form_id={{ form_id }}"
+    hx-target="#secondary-emotions-{{ form_id }}"
+    hx-swap="innerHTML">{{ t('emotions.core_' + core|lower|replace(' ', '_')|replace('-', '_')) }}</button>
+  {% endfor %}
+</div>

@@ -101,22 +101,18 @@ def dashboard(
 ):
     """Écran du jour : humeur, rêve, objectifs, événements."""
     today = date.today().isoformat()
-    mood_entry = db.get_mood_entry(conn, user.id, today)
     event_rows = db.list_visible_for_date(conn, "events", today, user.id)
     context = {
         "today": today,
-        "entry": mood_entry,
-        "entry_needs": db.get_needs_for_entry(conn, "mood", mood_entry["id"])
-        if mood_entry
-        else [],
+        "entry": db.get_mood_entry(conn, user.id, today),
         "dreams": db.list_visible_for_date(conn, "dreams", today, user.id),
         "goals": db.list_visible_for_date(conn, "daily_goals", today, user.id),
         "goals_progress": db.compute_goal_completion(conn, user.id, today),
-        "entries": [
-            {"entry": row, "entry_needs": db.get_needs_for_entry(conn, "event", row["id"])}
-            for row in event_rows
-        ],
+        "users_by_id": db.list_users_by_id(conn),
+        "entries": [db.build_event_view(conn, row, user.id) for row in event_rows],
         "needs_grouped": db.get_needs_grouped(conn),
+        "recent_events": db.list_recent_events_for_user(conn, user.id),
+        "emotion_cores": db.list_emotion_cores(conn),
     }
     return render(request, "dashboard.html", context, user=user)
 

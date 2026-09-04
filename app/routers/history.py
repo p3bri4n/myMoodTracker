@@ -31,9 +31,7 @@ def show_history(
         "mood_entries": mood_entries,
         "dreams": dreams,
         "goals": goals,
-        "events": [
-            {"entry": row, "entry_needs": db.get_needs_for_entry(conn, "event", row["id"])}
-            for row in events
-        ],
+        "users_by_id": db.list_users_by_id(conn),
+        "events": [db.build_event_view(conn, row, user.id) for row in events],
     }
     return render(request, "history.html", context, user=user)

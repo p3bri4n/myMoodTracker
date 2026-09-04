@@ -1,20 +1,31 @@
 {% set table = 'daily_goals' %}
 {% set row = entry %}
-<li class="card goal-item {{ 'goal-done' if entry.done else '' }}">
-  {% if entry.user_id == user.id %}
-  <label>
-    <input type="checkbox" {% if entry.done %}checked{% endif %}
-      hx-patch="/goals/{{ entry.id }}"
-      hx-vals='{"done": "{{ 'false' if entry.done else 'true' }}"}'
-      hx-target="closest li"
-      hx-swap="outerHTML">
-    <span class="goal-label">{{ entry.label }}</span>
-  </label>
-  {% include "partials/visibility_badge.html" %}
-  {% else %}
-  <label class="goal-readonly">
-    <input type="checkbox" disabled {% if entry.done %}checked{% endif %}>
-    <span class="goal-label">{{ entry.label }}</span>
-  </label>
+{% set is_owner = entry.user_id == user.id %}
+<li class="card goal-item {{ 'goal-done' if entry.done else '' }}" id="goal-{{ entry.id }}">
+  <div class="goal-main">
+    <label class="{{ 'goal-check' if is_owner else 'goal-readonly' }}">
+      <input type="checkbox" {% if not is_owner %}disabled{% endif %} {% if entry.done %}checked{% endif %}
+        {% if is_owner %}
+        hx-patch="/goals/{{ entry.id }}"
+        hx-vals='{"done": "{{ 'false' if entry.done else 'true' }}"}'
+        hx-target="closest li"
+        hx-swap="outerHTML"
+        {% endif %}>
+      <span class="goal-label">{{ entry.label }}</span>
+    </label>
+    <span class="goal-owner">
+      <span class="profile-dot" style="background-color: {{ users_by_id[entry.user_id].color }}"></span>
+      {{ users_by_id[entry.user_id].name }}
+    </span>
+  </div>
+  {% if is_owner %}
+  <div class="goal-actions">
+    {% include "partials/visibility_badge.html" %}
+    <button type="button" class="icon-button" title="{{ t('goals.edit') }}"
+      hx-get="/goals/{{ entry.id }}/edit" hx-target="closest li" hx-swap="outerHTML">✏️</button>
+    <button type="button" class="icon-button" title="{{ t('goals.delete') }}"
+      hx-delete="/goals/{{ entry.id }}" hx-target="closest li" hx-swap="delete"
+      hx-confirm="{{ t('goals.confirm_delete') }}">🗑️</button>
+  </div>
   {% endif %}
 </li>
