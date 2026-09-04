@@ -24,7 +24,7 @@ Local web app (LAN only), usable on mobile and desktop via browser. Two users id
 ## 3. Detailed features
 
 ### 3.1 Daily mood
-One entry per user per day (editable during the day). Suggested indicators, each on a 1–10 scale with a slider:
+One entry per user per day (editable during the day). Suggested indicators, each rated by tapping one of 5 faces (😢🙁😐🙂😄, red → orange → yellow → dark green → light green) rather than dragging a slider — 1 = very negative on that axis, 5 = very positive, applied uniformly across all six indicators (so for fatigue/stress, 5 means "little fatigue/stress felt"):
 - Physical fatigue
 - Mental fatigue
 - Morale / overall mood
@@ -32,7 +32,7 @@ One entry per user per day (editable during the day). Suggested indicators, each
 - Stress level
 - Sleep quality (previous night)
 
-Optional free-text field (short note) to add context to the day.
+Optional free-text field (short note) to add context to the day. No core-need tagging on mood entries (needs tagging applies to events only — see §3.5).
 
 ### 3.2 Dream journal
 - Optional entry per day (can be left empty)
@@ -66,7 +66,9 @@ Optional free-text field (short note) to add context to the day.
 - Behavior adopted
 - Consequences (on oneself, on the relationship, on the rest of the day)
 
-**"Core need" tag (optional, on both events AND daily mood, multi-select)**: each entry can be linked to **one or more** needs from a fixed reference list, organized by category (Security, Competence, Self-expression, Limits, Spontaneity — each with its own specific needs, e.g. stability, comfort, belonging, autonomy, achievement, empathy, structure, creativity, etc.). A complex situation can involve several needs at once (e.g. "respect" + "security"). Goal: identify over time which needs recur as met or unmet around mood variations.
+**"Core need" tag (optional, on events, multi-select)**: each event can be linked to **one or more** needs from a fixed reference list, organized by category (Security, Competence, Self-expression, Limits, Spontaneity — each with its own specific needs, e.g. stability, comfort, belonging, autonomy, achievement, empathy, structure, creativity, etc.). A complex situation can involve several needs at once (e.g. "respect" + "security"). Goal: identify over time which needs recur as met or unmet around mood variations.
+
+**Causal link between events (optional)**: any event can reference one other event of the same user as its cause (`caused_by_event_id`), to model chains like "anxious about picking up my daughter, no car available" caused by "procrastination: never went to get the car back from the garage". Only the user's own events can be selected as a cause (never the partner's), so no private content is ever exposed indirectly through the link — if the viewer isn't entitled to see the linked event (e.g. it was later made private), the link is shown without its content.
 
 ### 3.6 PDF export (for psychological follow-up)
 - Export of negative events over a given period, in table format — one row per event, columns: Date/time, Trigger, Aggravating factors, First signs, Emotion, Intensity (0-10), Thoughts, Physiological reactions, Behavior, Consequences (format deliberately kept close to the original grid, without a core-needs column)
@@ -94,12 +96,12 @@ mood_entries (
   id INTEGER PRIMARY KEY,
   user_id INTEGER,
   date DATE,
-  physical_fatigue INTEGER,    -- 1-10
-  mental_fatigue INTEGER,      -- 1-10
-  mood INTEGER,                -- 1-10
-  social_need INTEGER,         -- 1-10
-  stress INTEGER,              -- 1-10
-  sleep_quality INTEGER,       -- 1-10
+  physical_fatigue INTEGER,    -- 1-5 (face scale, 5 = best)
+  mental_fatigue INTEGER,      -- 1-5 (face scale, 5 = best)
+  mood INTEGER,                -- 1-5 (face scale, 5 = best)
+  social_need INTEGER,         -- 1-5 (face scale, 5 = best)
+  stress INTEGER,              -- 1-5 (face scale, 5 = best)
+  sleep_quality INTEGER,       -- 1-5 (face scale, 5 = best)
   note TEXT,
   visibility TEXT DEFAULT 'private',   -- private / public
   UNIQUE(user_id, date)
@@ -131,7 +133,8 @@ events (
   thoughts TEXT NULL,
   physiological_reactions TEXT NULL,
   behavior TEXT NULL,
-  consequences TEXT NULL
+  consequences TEXT NULL,
+  caused_by_event_id INTEGER NULL   -- references events(id), must belong to the same user
 )
 
 needs (

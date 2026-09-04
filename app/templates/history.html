@@ -45,7 +45,13 @@
   {% if goals %}
   <ul class="entry-list">
     {% for entry in goals %}
-    <li class="card goal-item {{ 'goal-done' if entry.done else '' }}">{{ entry.label }}</li>
+    <li class="card goal-item {{ 'goal-done' if entry.done else '' }}">
+      <span class="goal-label">{{ entry.label }}</span>
+      <span class="goal-owner">
+        <span class="profile-dot" style="background-color: {{ users_by_id[entry.user_id].color }}"></span>
+        {{ users_by_id[entry.user_id].name }}
+      </span>
+    </li>
     {% endfor %}
   </ul>
   {% else %}<p>{{ t('history.no_data') }}</p>{% endif %}
@@ -56,7 +62,7 @@
   {% if events %}
   <ul class="entry-list">
     {% for item in events %}
-      {% with entry = item.entry, entry_needs = item.entry_needs %}
+      {% with entry = item.entry, entry_needs = item.entry_needs, caused_by = item.caused_by, emotion = item.emotion %}
         {% include "partials/event_row.html" %}
       {% endwith %}
     {% endfor %}

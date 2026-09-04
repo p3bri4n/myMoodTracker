@@ -116,8 +116,160 @@ fieldset {
 .visibility-choice { display: flex; gap: 1rem; border: none; padding: 0; }
 .visibility-choice label { display: flex; align-items: center; gap: 0.3rem; font-weight: 400; }
 
+.face-picker { margin-bottom: 0.4rem; }
+.face-picker-label { display: block; font-weight: 600; font-size: 0.9rem; margin-bottom: 0.3rem; }
+.face-options { display: flex; gap: 0.4rem; }
+.face-option { flex: 1; }
+.face-input {
+  position: absolute;
+  width: 1px; height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+.face-visual {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  border-radius: 50%;
+  font-size: 1.4rem;
+  border: 2px solid transparent;
+  cursor: pointer;
+  opacity: 0.5;
+  transition: transform 0.1s, opacity 0.1s;
+}
+.face-1 { background: #e74c3c33; }
+.face-2 { background: #e67e2233; }
+.face-3 { background: #f1c40f33; }
+.face-4 { background: #2e7d3233; }
+.face-5 { background: #8bc34a33; }
+.face-input:checked + .face-visual { opacity: 1; border-color: currentColor; transform: scale(1.15); }
+.face-input:focus-visible + .face-visual { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.event-caused-by { font-size: 0.85rem; color: var(--muted); }
+.event-emotion { font-size: 0.9rem; color: var(--text); }
+
+.emotion-picker { margin-bottom: 0.4rem; display: flex; flex-direction: column; gap: 0.4rem; }
+
+/* Chaque niveau (core/secondary/specific) tient sur une seule ligne, défilable horizontalement
+   plutôt que de passer à la ligne — les libellés traduits peuvent être longs. */
+.emotion-tiles {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0.4rem;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 0.3rem;
+}
+
+/* Couleurs classiques de la roue des émotions (style Plutchik), 3 teintes par cœur :
+   plus la teinte est soutenue, plus on est profond dans la roue (specific -> secondary -> core). */
+.emotion-core-anger {
+  --shade-specific: #fadbd8; --shade-secondary: #f1948a; --shade-core: #c0392b;
+  --shade-light-text: #6b1a12;
+}
+.emotion-core-disgust {
+  --shade-specific: #e8daef; --shade-secondary: #c39bd3; --shade-core: #6c3483;
+  --shade-light-text: #4a235a;
+}
+.emotion-core-sadness {
+  --shade-specific: #d6eaf8; --shade-secondary: #85c1e9; --shade-core: #21618c;
+  --shade-light-text: #154360;
+}
+.emotion-core-fear {
+  --shade-specific: #d5f5e3; --shade-secondary: #82e0aa; --shade-core: #1e8449;
+  --shade-light-text: #186a3b;
+}
+.emotion-core-surprise {
+  --shade-specific: #d0ece7; --shade-secondary: #76d7c4; --shade-core: #148f77;
+  --shade-light-text: #0e6251;
+}
+.emotion-core-joy {
+  --shade-specific: #fef9e7; --shade-secondary: #f7dc6f; --shade-core: #b7950b;
+  --shade-light-text: #7d6608;
+}
+
+.emotion-tile {
+  display: inline-flex;
+  flex: 0 0 auto;
+  white-space: nowrap;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 0.8rem;
+  border-radius: 999px;
+  border: 2px solid transparent;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: transform 0.1s, opacity 0.1s;
+}
+.emotion-tile-core { background: var(--shade-core); border-color: var(--shade-core); color: #fff; }
+.emotion-tile-secondary { background: var(--shade-secondary); border-color: var(--shade-secondary); color: var(--shade-light-text); }
+.emotion-tile-specific { background: var(--shade-specific); border-color: var(--shade-specific); color: var(--shade-light-text); }
+button.emotion-tile { opacity: 0.85; }
+button.emotion-tile:hover { opacity: 1; }
+
+.emotion-radio-input {
+  position: absolute;
+  width: 1px; height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+/* Une fois choisie, la spécifique adopte la teinte la plus soutenue ("core") : elle se distingue
+   visuellement de ses voisines non sélectionnées, dans la même famille de couleur. */
+.emotion-radio-input:checked + .emotion-tile-specific {
+  background: var(--shade-core);
+  border-color: var(--shade-core);
+  color: #fff;
+  transform: scale(1.05);
+}
+.emotion-radio-input:focus-visible + .emotion-tile { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.needs-select { border: 1px solid var(--border); border-radius: 6px; padding: 0.6rem; }
+.needs-select summary { cursor: pointer; font-weight: 700; min-height: 44px; display: flex; align-items: center; }
 .needs-select .needs-category-label { font-weight: 700; margin: 0.4rem 0 0.2rem; }
 .need-option { display: flex; align-items: center; gap: 0.4rem; font-weight: 400; min-height: 44px; }
+
+.dashboard-section {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 1rem;
+  padding: 0 1rem 1rem;
+}
+
+.dashboard-section > .section-summary {
+  cursor: pointer;
+  font-size: 1.15rem;
+  font-weight: 700;
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  margin: 0 -1rem;
+  padding: 0 1rem;
+  list-style: none;
+}
+
+.dashboard-section > .section-summary::-webkit-details-marker { display: none; }
+.dashboard-section > .section-summary::before { content: "▸ "; color: var(--accent); }
+.dashboard-section[open] > .section-summary::before { content: "▾ "; }
+
+.goal-main { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; flex-wrap: wrap; }
+.goal-check, .goal-readonly { display: flex; align-items: center; gap: 0.5rem; font-weight: 400; min-height: 44px; flex: 1; }
+.goal-owner { display: flex; align-items: center; gap: 0.3rem; font-size: 0.85rem; color: var(--muted); white-space: nowrap; }
+.goal-actions { display: flex; align-items: center; gap: 0.5rem; margin-top: 0.4rem; }
+.icon-button {
+  min-width: 44px;
+  min-height: 44px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 1.1rem;
+  color: var(--text);
+}
+.goal-edit-form { display: flex; flex-direction: column; gap: 0.5rem; }
+.goal-edit-actions { display: flex; gap: 0.5rem; }
+.goal-edit-actions button[type="button"] { background: var(--bg); color: var(--text); border: 1px solid var(--border); }
 
 button {
   min-height: 44px;

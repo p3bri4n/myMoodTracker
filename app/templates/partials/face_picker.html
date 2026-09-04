@@ -1,0 +1,15 @@
+{% macro face_picker(field_name, label, value) %}
+<div class="face-picker">
+  <span class="face-picker-label">{{ label }}</span>
+  <div class="face-options">
+    {% for v, emoji in [(1, '😢'), (2, '🙁'), (3, '😐'), (4, '🙂'), (5, '😄')] %}
+    <label class="face-option">
+      <input type="radio" class="face-input" name="{{ field_name }}" value="{{ v }}"
+        aria-label="{{ t('mood.level_' ~ v) }}"
+        {% if value == v %}checked{% endif %} required>
+      <span class="face-visual face-{{ v }}">{{ emoji }}</span>
+    </label>
+    {% endfor %}
+  </div>
+</div>
+{% endmacro %}

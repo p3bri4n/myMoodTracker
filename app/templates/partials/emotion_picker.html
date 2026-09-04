@@ -1,0 +1,9 @@
+{% set cores = emotion_cores %}
+<div class="emotion-picker">
+  <span class="face-picker-label">{{ t('events.emotion') }}</span>
+  <div id="core-emotions-{{ form_id }}">
+    {% include "partials/emotion_core_options.html" %}
+  </div>
+  <div id="secondary-emotions-{{ form_id }}"></div>
+  <div id="specific-emotions-{{ form_id }}"></div>
+</div>

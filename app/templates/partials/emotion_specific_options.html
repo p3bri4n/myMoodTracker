@@ -1,0 +1,8 @@
+<div class="emotion-tiles">
+  {% for emotion in specifics %}
+  <label class="emotion-tile-radio">
+    <input type="radio" class="emotion-radio-input" name="emotion_id" value="{{ emotion.id }}">
+    <span class="emotion-tile emotion-tile-specific emotion-core-{{ core|lower }}">{{ t('emotions.specific_' + emotion.specific|lower|replace(' ', '_')|replace('-', '_')) }}</span>
+  </label>
+  {% endfor %}
+</div>

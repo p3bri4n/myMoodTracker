@@ -9,12 +9,20 @@
 
   {% if entry.description %}<p class="event-description">{{ entry.description }}</p>{% endif %}
 
+  {% if emotion %}
+  <p class="event-emotion">
+    🎭 {{ t('emotions.core_' + emotion.core|lower|replace(' ', '_')|replace('-', '_')) }}
+    / {{ t('emotions.secondary_' + emotion.secondary|lower|replace(' ', '_')|replace('-', '_')) }}
+    / {{ t('emotions.specific_' + emotion.specific|lower|replace(' ', '_')|replace('-', '_')) }}
+  </p>
+  {% endif %}
+
   {% if entry.type == 'negative' %}
   <dl class="event-grid">
     <dt>{{ t('events.trigger') }}</dt><dd>{{ entry.trigger }}</dd>
     {% if entry.aggravating_factors %}<dt>{{ t('events.aggravating_factors') }}</dt><dd>{{ entry.aggravating_factors }}</dd>{% endif %}
     {% if entry.first_signs %}<dt>{{ t('events.first_signs') }}</dt><dd>{{ entry.first_signs }}</dd>{% endif %}
-    <dt>{{ t('events.emotion') }}</dt><dd>{{ entry.emotion }} ({{ entry.intensity }}/10)</dd>
+    <dt>{{ t('events.intensity') }}</dt><dd>{{ entry.intensity }}/10</dd>
     {% if entry.thoughts %}<dt>{{ t('events.thoughts') }}</dt><dd>{{ entry.thoughts }}</dd>{% endif %}
     {% if entry.physiological_reactions %}<dt>{{ t('events.physiological_reactions') }}</dt><dd>{{ entry.physiological_reactions }}</dd>{% endif %}
     {% if entry.behavior %}<dt>{{ t('events.behavior') }}</dt><dd>{{ entry.behavior }}</dd>{% endif %}
@@ -26,5 +34,12 @@
   <ul class="entry-needs">
     {% for need in entry_needs %}<li>{{ t('needs.' + need.name) }}</li>{% endfor %}
   </ul>
+  {% endif %}
+
+  {% if entry.caused_by_event_id %}
+  <p class="event-caused-by">
+    🔗 {{ t('events.caused_by') }}:
+    {% if caused_by %}{{ caused_by.description or caused_by.trigger }}{% else %}<em>{{ t('events.caused_by_hidden') }}</em>{% endif %}
+  </p>
   {% endif %}
 </li>

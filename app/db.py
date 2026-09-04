@@ -45,6 +45,54 @@ NEEDS_SEED: list[tuple[str, str]] = [
     ("Spontaneity", "curiosity"),
 ]
 
+# Roue des émotions (style Plutchik) : core -> secondary -> [specific, ...].
+# Table de référence fixe, seedée une fois (144 lignes = 6 x 4 x 6).
+EMOTIONS_WHEEL: dict[str, dict[str, list[str]]] = {
+    "Anger": {
+        "Critical": ["Sarcastic", "Sceptical", "Suspicious", "Judgmental", "Withdrawn", "Disrespected"],
+        "Resentful": ["Betrayed", "Indignant", "Violated", "Aggrieved", "Bitter", "Let down"],
+        "Hostile": ["Hateful", "Vengeful", "Provoked", "Threatened", "Seething", "Infuriated"],
+        "Irritated": ["Agitated", "Frustrated", "Annoyed", "Impatient", "Aggravated", "On edge"],
+    },
+    "Disgust": {
+        "Judgmental": ["Disgusted", "Revolted", "Contemptuous", "Disapproving", "Appalled", "Repelled"],
+        "Disappointed": ["Disillusioned", "Dismayed", "Displeased", "Let down", "Disenchanted", "Discouraged"],
+        "Awful": ["Nauseated", "Detestable", "Loathsome", "Repugnant", "Repulsed", "Sickened"],
+        "Avoidant": ["Averse", "Reluctant", "Withdrawn", "Distant", "Guarded", "Hesitant"],
+    },
+    "Sadness": {
+        "Guilty": ["Ashamed", "At fault", "Remorseful", "Culpable", "Regretful", "Embarrassed"],
+        "Lonely": ["Isolated", "Abandoned", "Forsaken", "Rejected", "Excluded", "Distant"],
+        "Despairing": ["Hopeless", "Grief-stricken", "Powerless", "Empty", "Discouraged", "Helpless"],
+        "Vulnerable": ["Fragile", "Victimized", "Hurt", "Wounded", "Insecure", "Exposed"],
+    },
+    "Fear": {
+        "Insecure": ["Anxious", "Threatened", "Nervous", "Overwhelmed", "Worried", "Inadequate"],
+        "Scared": ["Terrified", "Panicked", "Frightened", "Alarmed", "Petrified", "Startled"],
+        "Rejected": ["Excluded", "Persecuted", "Alienated", "Disrespected", "Ridiculed", "Humiliated"],
+        "Confused": ["Doubtful", "Bewildered", "Perplexed", "Hesitant", "Torn", "Uncertain"],
+    },
+    "Surprise": {
+        "Confused": ["Startled", "Stunned", "Disillusioned", "Perplexed", "Astonished", "Dazed"],
+        "Amazed": ["Awed", "Astounded", "Wonderstruck", "Speechless", "Overwhelmed", "Dumbfounded"],
+        "Excited": ["Eager", "Energetic", "Enthusiastic", "Lively", "Animated", "Elated"],
+        "Uncertain": ["Puzzled", "Disoriented", "Shocked", "Unsettled", "Baffled", "Wary"],
+    },
+    "Joy": {
+        "Interested": ["Curious", "Inspired", "Engaged", "Fascinated", "Absorbed", "Intrigued"],
+        "Content": ["Peaceful", "Satisfied", "Grateful", "Fulfilled", "Serene", "Relaxed"],
+        "Proud": ["Confident", "Successful", "Accomplished", "Valued", "Respected", "Triumphant"],
+        "Optimistic": ["Hopeful", "Encouraged", "Energized", "Uplifted", "Eager", "Cheerful"],
+    },
+}
+
+EMOTIONS_SEED: list[tuple[str, str, str]] = [
+    (core, secondary, specific)
+    for core, secondaries in EMOTIONS_WHEEL.items()
+    for secondary, specifics in secondaries.items()
+    for specific in specifics
+]
+
 # Tables sur lesquelles la bascule privé/public générique est autorisée.
 VISIBILITY_TABLES = {"mood_entries", "dreams", "events", "daily_goals"}
 
@@ -92,12 +140,13 @@ CREATE TABLE IF NOT EXISTS events (
   trigger TEXT,
   aggravating_factors TEXT,
   first_signs TEXT,
-  emotion TEXT,
   intensity INTEGER,
   thoughts TEXT,
   physiological_reactions TEXT,
   behavior TEXT,
-  consequences TEXT
+  consequences TEXT,
+  caused_by_event_id INTEGER REFERENCES events(id),
+  emotion_id INTEGER REFERENCES emotions(id)
 );
 
 CREATE TABLE IF NOT EXISTS needs (
@@ -111,6 +160,14 @@ CREATE TABLE IF NOT EXISTS entry_needs (
   entry_type TEXT NOT NULL,
   entry_id INTEGER NOT NULL,
   need_id INTEGER NOT NULL REFERENCES needs(id)
+);
+
+CREATE TABLE IF NOT EXISTS emotions (
+  id INTEGER PRIMARY KEY,
+  core TEXT NOT NULL,
+  secondary TEXT NOT NULL,
+  specific TEXT NOT NULL,
+  UNIQUE(core, secondary, specific)
 );
 
 CREATE TABLE IF NOT EXISTS daily_goals (
@@ -154,13 +211,36 @@ def connect(db_path: str | None = None) -> sqlite3.Connection:
     return conn
 
 
+def _column_exists(conn: sqlite3.Connection, table: str, column: str) -> bool:
+    return any(
+        row["name"] == column for row in conn.execute(f"PRAGMA table_info({table})")
+    )
+
+
+# Colonnes ajoutées après la création initiale des tables : (table, colonne, DDL du ALTER).
+# CREATE TABLE IF NOT EXISTS ne modifie pas un schéma existant, donc toute colonne
+# ajoutée au SCHEMA ci-dessus doit aussi être listée ici pour les bases déjà créées.
+_COLUMN_MIGRATIONS = [
+    ("events", "caused_by_event_id", "ALTER TABLE events ADD COLUMN caused_by_event_id INTEGER REFERENCES events(id)"),
+    ("events", "emotion_id", "ALTER TABLE events ADD COLUMN emotion_id INTEGER REFERENCES emotions(id)"),
+]
+
+
 def init_db(conn: sqlite3.Connection) -> None:
-    """Crée les tables si besoin et seed la table `needs` une seule fois."""
+    """Crée les tables si besoin, applique les migrations de colonnes, et seed `needs`/`emotions`."""
     conn.executescript(SCHEMA)
+    for table, column, ddl in _COLUMN_MIGRATIONS:
+        if not _column_exists(conn, table, column):
+            conn.execute(ddl)
     row = conn.execute("SELECT COUNT(*) AS n FROM needs").fetchone()
     if row["n"] == 0:
         conn.executemany(
             "INSERT INTO needs (category, name) VALUES (?, ?)", NEEDS_SEED
+        )
+    row = conn.execute("SELECT COUNT(*) AS n FROM emotions").fetchone()
+    if row["n"] == 0:
+        conn.executemany(
+            "INSERT INTO emotions (core, secondary, specific) VALUES (?, ?, ?)", EMOTIONS_SEED
         )
     conn.commit()
 
@@ -374,6 +454,35 @@ def create_dream(
     ).fetchone()
 
 
+# --- Emotions (3-level wheel: core -> secondary -> specific) -----------------
+
+
+def list_emotion_cores(conn: sqlite3.Connection) -> list[str]:
+    rows = conn.execute("SELECT DISTINCT core FROM emotions ORDER BY core").fetchall()
+    return [r["core"] for r in rows]
+
+
+def list_emotion_secondaries(conn: sqlite3.Connection, core: str) -> list[str]:
+    rows = conn.execute(
+        "SELECT DISTINCT secondary FROM emotions WHERE core = ? ORDER BY secondary",
+        (core,),
+    ).fetchall()
+    return [r["secondary"] for r in rows]
+
+
+def list_emotion_specifics(
+    conn: sqlite3.Connection, core: str, secondary: str
+) -> list[sqlite3.Row]:
+    return conn.execute(
+        "SELECT * FROM emotions WHERE core = ? AND secondary = ? ORDER BY specific",
+        (core, secondary),
+    ).fetchall()
+
+
+def get_emotion_by_id(conn: sqlite3.Connection, emotion_id: int) -> sqlite3.Row | None:
+    return conn.execute("SELECT * FROM emotions WHERE id = ?", (emotion_id,)).fetchone()
+
+
 # --- Events -------------------------------------------------------------------
 
 
@@ -392,11 +501,55 @@ def list_negative_events_for_period(
     conn: sqlite3.Connection, user_id: int, date_from: str, date_to: str
 ) -> list[sqlite3.Row]:
     return conn.execute(
-        "SELECT * FROM events "
-        "WHERE user_id = ? AND type = 'negative' AND date BETWEEN ? AND ? "
-        "ORDER BY date, time",
+        "SELECT events.*, "
+        "emotions.core AS emotion_core, emotions.secondary AS emotion_secondary, "
+        "emotions.specific AS emotion_specific "
+        "FROM events LEFT JOIN emotions ON emotions.id = events.emotion_id "
+        "WHERE events.user_id = ? AND events.type = 'negative' "
+        "AND events.date BETWEEN ? AND ? "
+        "ORDER BY events.date, events.time",
         (user_id, date_from, date_to),
     ).fetchall()
+
+
+def get_event_if_visible(
+    conn: sqlite3.Connection, event_id: int, requesting_user_id: int
+) -> sqlite3.Row | None:
+    """Renvoie l'événement s'il appartient au demandeur ou s'il est public, sinon None."""
+    row = conn.execute("SELECT * FROM events WHERE id = ?", (event_id,)).fetchone()
+    if row is None:
+        return None
+    if row["user_id"] != requesting_user_id and row["visibility"] != "public":
+        return None
+    return row
+
+
+def list_recent_events_for_user(
+    conn: sqlite3.Connection, user_id: int, limit: int = 20
+) -> list[sqlite3.Row]:
+    """Événements les plus récents de l'utilisateur, pour choisir une cause dans le formulaire."""
+    return conn.execute(
+        "SELECT * FROM events WHERE user_id = ? ORDER BY date DESC, id DESC LIMIT ?",
+        (user_id, limit),
+    ).fetchall()
+
+
+def build_event_view(
+    conn: sqlite3.Connection, row: sqlite3.Row, requesting_user_id: int
+) -> dict:
+    """Assemble le contexte d'affichage d'un événement : entrée, besoins, cause liée, émotion."""
+    caused_by = None
+    if row["caused_by_event_id"] is not None:
+        caused_by = get_event_if_visible(conn, row["caused_by_event_id"], requesting_user_id)
+    emotion = None
+    if row["emotion_id"] is not None:
+        emotion = get_emotion_by_id(conn, row["emotion_id"])
+    return {
+        "entry": row,
+        "entry_needs": get_needs_for_entry(conn, "event", row["id"]),
+        "caused_by": caused_by,
+        "emotion": emotion,
+    }
 
 
 # --- Goals --------------------------------------------------------------------
@@ -419,21 +572,53 @@ def create_goal(
     ).fetchone()
 
 
-def set_goal_done(
-    conn: sqlite3.Connection, goal_id: int, user_id: int, done: bool
+def get_goal_if_visible(
+    conn: sqlite3.Connection, goal_id: int, requesting_user_id: int
 ) -> sqlite3.Row | None:
+    """Renvoie l'objectif s'il appartient au demandeur ou s'il est public, sinon None."""
+    row = conn.execute("SELECT * FROM daily_goals WHERE id = ?", (goal_id,)).fetchone()
+    if row is None:
+        return None
+    if row["user_id"] != requesting_user_id and row["visibility"] != "public":
+        return None
+    return row
+
+
+def update_goal(
+    conn: sqlite3.Connection,
+    goal_id: int,
+    user_id: int,
+    label: str | None = None,
+    done: bool | None = None,
+) -> sqlite3.Row | None:
+    """Met à jour le libellé et/ou l'état d'un objectif dont l'appelant est propriétaire."""
     row = conn.execute(
         "SELECT * FROM daily_goals WHERE id = ? AND user_id = ?", (goal_id, user_id)
     ).fetchone()
     if row is None:
         return None
+    new_label = label if label is not None else row["label"]
+    new_done = int(done) if done is not None else row["done"]
     conn.execute(
-        "UPDATE daily_goals SET done = ? WHERE id = ?", (int(done), goal_id)
+        "UPDATE daily_goals SET label = ?, done = ? WHERE id = ?",
+        (new_label, new_done, goal_id),
     )
     conn.commit()
     return conn.execute(
         "SELECT * FROM daily_goals WHERE id = ?", (goal_id,)
     ).fetchone()
+
+
+def delete_goal(conn: sqlite3.Connection, goal_id: int, user_id: int) -> bool:
+    """Supprime un objectif dont l'appelant est propriétaire. Renvoie False si absent/non propriétaire."""
+    row = conn.execute(
+        "SELECT * FROM daily_goals WHERE id = ? AND user_id = ?", (goal_id, user_id)
+    ).fetchone()
+    if row is None:
+        return False
+    conn.execute("DELETE FROM daily_goals WHERE id = ?", (goal_id,))
+    conn.commit()
+    return True
 
 
 def compute_goal_completion(

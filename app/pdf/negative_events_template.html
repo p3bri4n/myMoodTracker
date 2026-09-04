@@ -37,7 +37,13 @@
         <td>{{ e.trigger or '' }}</td>
         <td>{{ e.aggravating_factors or '' }}</td>
         <td>{{ e.first_signs or '' }}</td>
-        <td>{{ e.emotion or '' }}</td>
+        <td>
+          {%- if e.emotion_core -%}
+          {{ t('emotions.core_' + e.emotion_core|lower|replace(' ', '_')|replace('-', '_')) }}
+          / {{ t('emotions.secondary_' + e.emotion_secondary|lower|replace(' ', '_')|replace('-', '_')) }}
+          / {{ t('emotions.specific_' + e.emotion_specific|lower|replace(' ', '_')|replace('-', '_')) }}
+          {%- endif -%}
+        </td>
         <td>{{ e.intensity if e.intensity is not none else '' }}</td>
         <td>{{ e.thoughts or '' }}</td>
         <td>{{ e.physiological_reactions or '' }}</td>

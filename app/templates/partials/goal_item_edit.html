@@ -1,0 +1,15 @@
+<li class="card goal-item goal-item-editing" id="goal-{{ entry.id }}">
+  <form class="goal-edit-form"
+        hx-patch="/goals/{{ entry.id }}"
+        hx-target="closest li"
+        hx-swap="outerHTML">
+    <input type="text" name="label" value="{{ entry.label }}" required autofocus>
+    <div class="goal-edit-actions">
+      <button type="submit">{{ t('common.submit') }}</button>
+      <button type="button"
+        hx-get="/goals/{{ entry.id }}"
+        hx-target="closest li"
+        hx-swap="outerHTML">{{ t('common.cancel') }}</button>
+    </div>
+  </form>
+</li>
